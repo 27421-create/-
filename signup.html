@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Savetrack- ลงทะเบียน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ใช้สไตล์เดิมทั้งหมด */
+    body{font-family:'Sarabun',sans-serif;margin:0;padding:0;background-color:#F0FFF0;color:#1E5128;display:flex;justify-content:center;align-items:center;min-height:100vh;text-align:center;overflow:hidden}
+    .auth-container{background:#fff;padding:40px;border-radius:20px;box-shadow:0 15px 30px rgba(0,0,0,.1);width:90%;max-width:420px;box-sizing:border-box}
+    .auth-container h1{color:#28A745;margin-bottom:20px;font-size:2.5em}
+    .input-group{margin-bottom:20px;text-align:left;position:relative}
+    .input-group label{display:block;margin-bottom:8px;color:#555;font-weight:500}
+    .input-group input{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;box-sizing:border-box;font-size:1em;transition:all .3s}
+    .input-group input:focus{border-color:#28A745;box-shadow:0 0 5px rgba(40,167,69,.3);outline:none}
+    .password-toggle-icon{position:absolute;top:50%;right:15px;transform:translateY(10px);cursor:pointer;color:#888;transition:color .3s}
+    .password-toggle-icon:hover{color:#333}
+    .auth-button{width:100%;padding:15px;background:#28A745;color:#fff;border:none;border-radius:12px;font-size:1.1em;font-weight:bold;cursor:pointer;transition:all .3s;box-shadow:0 5px 15px rgba(40,167,69,.2);margin-top:10px}
+    .auth-button:hover{background:#1E5128;box-shadow:0 7px 20px rgba(30,81,40,.3)}
+    .google-btn{background:#fff;color:#555;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 5px 15px rgba(0,0,0,.1)}
+    .google-btn:hover{background:#f5f5f5;box-shadow:0 7px 20px rgba(0,0,0,.15)}
+    .google-btn img{height:20px}
+    .message{margin-top:15px;padding:12px;border-radius:10px;font-weight:500;display:none}
+    .message.success{background:#d4edda;color:#155724}
+    .message.error{background:#f8d7da;color:#721c24}
+    .bottom-link-container{margin-top:25px;font-size:.9em;color:#555}
+    .bottom-link-container a{color:#28A745;text-decoration:none;font-weight:bold}
+    .bottom-link-container a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h1 class="app-title">Savetrack</h1>
+    <h2>ลงทะเบียน</h2>
+
+    <div id="signup-form">
+      <form id="signup-form-inner">
+        <div class="input-group">
+          <label for="signup-email">อีเมล</label>
+          <input type="email" id="signup-email" placeholder="กรอกอีเมลของคุณ" required>
+        </div>
+        <div class="input-group">
+          <label for="signup-password">รหัสผ่าน</label>
+          <input type="password" id="signup-password" placeholder="อย่างน้อย 6 ตัวอักษร" required>
+          <i class="fa-solid fa-eye-slash password-toggle-icon" id="toggle-signup-password"></i>
+        </div>
+        <div class="input-group">
+          <label for="signup-confirm-password">ยืนยันรหัสผ่าน</label>
+          <input type="password" id="signup-confirm-password" placeholder="กรอกรหัสผ่านอีกครั้ง" required>
+          <i class="fa-solid fa-eye-slash password-toggle-icon" id="toggle-confirm-password"></i>
+        </div>
+        <button type="submit" class="auth-button">ลงทะเบียน</button>
+      </form>
+
+      <button id="google-signup-btn" class="auth-button google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+        ลงทะเบียนด้วย Google
+      </button>
+
+      <div id="signup-message" class="message"></div>
+    </div>
+
+    <div class="bottom-link-container">
+      <p>มีบัญชีอยู่แล้วใช่ไหม? <a href="login.html">เข้าสู่ระบบ</a></p>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import {
+      getAuth, setPersistence, browserSessionPersistence,
+      createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCUfR21B9_cPX1XrcmUXp5-AdHzVGhL5c8",
+      authDomain: "app-gf-1ee66.firebaseapp.com",
+      projectId: "app-gf-1ee66",
+      storageBucket: "app-gf-1ee66.firebasestorage.app",
+      messagingSenderId: "412479938849",
+      appId: "1:412479938849:web:ed0f49c66adb5e60ce1e60",
+      measurementId: "G-Y2YBZ2KRBC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    await setPersistence(auth, browserSessionPersistence);
+
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    const $=(s)=>document.querySelector(s);
+    const showMsg=(m,t="error")=>{const el=$('#signup-message');el.textContent=m;el.className=`message ${t}`;el.style.display='block';};
+
+    // toggle eyes
+    const toggle=(inputSel,iconSel)=>{
+      const input=$(inputSel), icon=$(iconSel);
+      const type=input.getAttribute('type')==='password'?'text':'password';
+      input.setAttribute('type',type); icon.classList.toggle('fa-eye-slash'); icon.classList.toggle('fa-eye');
+    };
+    $('#toggle-signup-password').addEventListener('click',()=>toggle('#signup-password','#toggle-signup-password'));
+    $('#toggle-confirm-password').addEventListener('click',()=>toggle('#signup-confirm-password','#toggle-confirm-password'));
+
+    // email/password sign up
+    $('#signup-form-inner').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email=$('#signup-email').value.trim();
+      const pass=$('#signup-password').value;
+      const pass2=$('#signup-confirm-password').value;
+      if(pass!==pass2) return showMsg('รหัสผ่านไม่ตรงกัน');
+      try{
+        await createUserWithEmailAndPassword(auth,email,pass);
+        showMsg('ลงทะเบียนสำเร็จ! กำลังเข้าสู่ระบบ...','success');
+      }catch(err){
+        const map={
+          'auth/email-already-in-use':'อีเมลนี้ถูกใช้งานแล้ว',
+          'auth/invalid-email':'รูปแบบอีเมลไม่ถูกต้อง',
+          'auth/weak-password':'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร',
+          'auth/unauthorized-domain':'โดเมนนี้ยังไม่ได้อนุญาต (Authorized domains)'
+        };
+        showMsg(map[err.code] || `เกิดข้อผิดพลาด: ${err.code}`);
+        console.error(err);
+      }
+    });
+
+    // Google signup
+    $('#google-signup-btn').addEventListener('click', async ()=>{
+      try{ await signInWithPopup(auth, provider); }
+      catch(err){
+        const map={
+          'auth/popup-blocked':'เบราว์เซอร์บล็อกป๊อปอัป กรุณาอนุญาต',
+          'auth/unauthorized-domain':'โดเมนนี้ยังไม่ได้อนุญาต (Authorized domains)'
+        };
+        showMsg(map[err.code] || `ลงทะเบียนด้วย Google ไม่สำเร็จ: ${err.code}`);
+        console.error(err);
+      }
+    });
+
+    // ถ้าล็อกอินแล้ว → เข้าหน้าหลัก
+    onAuthStateChanged(auth,(user)=>{ if(user) window.location.href='dashboard.html'; });
+  </script>
+</body>
+</html>

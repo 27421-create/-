@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savetrack - กำลังโหลด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body{
+      font-family:'Sarabun',sans-serif;margin:0;padding:0;
+      background-color:#EBF7E9;
+      background-image:radial-gradient(#d5e7d5 1px,transparent 1px),
+                       linear-gradient(to bottom,#d5e7d5,#f0f8f0);
+      background-size:20px 20px,100% 100%;
+      background-attachment:fixed;
+      color:#1E5128;
+      display:flex;justify-content:center;align-items:center;
+      height:100vh;text-align:center;overflow:hidden
+    }
+    .splash-container{display:flex;flex-direction:column;align-items:center;animation:slideIn 1.5s ease-out forwards}
+    .logo{width:120px;height:120px;object-fit:contain;animation:popIn 1.5s ease-out forwards;transform:scale(0)}
+    .app-name{font-size:2.5em;font-weight:bold;margin-top:20px;color:#1E5128;opacity:0;animation:fadeIn 2s ease-in-out forwards;animation-delay:.5s}
+    .loading-bar{width:200px;height:5px;background:#E0E0E0;border-radius:5px;margin-top:30px;overflow:hidden;animation:fadeIn 2.5s ease-in-out forwards;animation-delay:1s}
+    .loading-bar::after{content:'';display:block;width:50%;height:100%;background:#28A745;animation:loading 2s linear infinite}
+    @keyframes slideIn{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes loading{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+  </style>
+</head>
+<body>
+  <div class="splash-container">
+    <!-- เปลี่ยนจาก emoji เป็นรูปโลโก้ -->
+    <img src="c:\Users\WIN10\Downloads\3c4cd75d-9271-4a5a-b7d7-19abcfbbd1f7 (2).jfif" alt="Savetrack Logo" class="logo">
+    <h1 class="app-name">SAVETRACK</h1>
+    <div class="loading-bar"></div>
+  </div>
+
+  <!-- Firebase: เช็คสถานะแล้วพาไป -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCUfR21B9_cPX1XrcmUXp5-AdHzVGhL5c8",
+      authDomain: "app-gf-1ee66.firebaseapp.com",
+      projectId: "app-gf-1ee66",
+      storageBucket: "app-gf-1ee66.firebasestorage.app",
+      messagingSenderId: "412479938849",
+      appId: "1:412479938849:web:ed0f49c66adb5e60ce1e60",
+      measurementId: "G-Y2YBZ2KRBC"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // splash 3 วิ แล้วไปตามสถานะ
+    setTimeout(() => {
+      onAuthStateChanged(auth, (user) => {
+        window.location.href = user ? "dashboard.html" : "login.html";
+      });
+    }, 4000);
+  </script>
+</body>
+</html>
